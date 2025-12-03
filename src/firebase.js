@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-// 1. EKSİK: Auth kütüphanelerini import etmen lazım
 import { getAuth, GoogleAuthProvider } from "firebase/auth"; 
 
 const firebaseConfig = {

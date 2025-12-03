@@ -1,0 +1,29 @@
+<svg
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient
+                id="privaGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#00A884" />
+                <stop offset="100%" stopColor="#005C4B" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M50 5 C25 5, 10 20, 10 45 C10 75, 50 95, 50 95 C50 95, 90 75, 90 45 C90 20, 75 5, 50 5 Z"
+              fill="url(#privaGradient)"
+            />
+            <path
+              d="M50 28 C39 28, 30 35, 30 45 C30 55, 39 62, 50 62 C52 62, 54 61.5, 56 61 L64 65 L62 57 C67 54, 70 50, 70 45 C70 35, 61 28, 50 28 Z"
+              fill="white"
+            />
+            <circle cx="43" cy="45" r="2" fill="#005C4B" />
+            <circle cx="50" cy="45" r="2" fill="#005C4B" />
+            <circle cx="57" cy="45" r="2" fill="#005C4B" />
+          </svg>

@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore";
 import CryptoJS from "crypto-js";
 
-export const Chats = ({ isOpen, selectedUser, currentUser }) => {
+export const Chats = ({ isOpen, selectedUser, currentUser, toggleSidebar }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const endOfMessagesRef = useRef(null);
@@ -48,9 +48,7 @@ export const Chats = ({ isOpen, selectedUser, currentUser }) => {
   }, [chatId]);
 
   useEffect(() => {
-    setTimeout(() => {
-      endOfMessagesRef.current?.scrollIntoView({ behavior: "auto" });
-    }, 100);
+    endOfMessagesRef.current?.scrollIntoView({ behavior: "auto" });
   }, [messages]);
 
   const sendMessage = async (e) => {
@@ -67,6 +65,7 @@ export const Chats = ({ isOpen, selectedUser, currentUser }) => {
   if (!selectedUser) {
     return (
       <ChatLayout>
+        {!isOpen && <MenuBtn onClick={toggleSidebar}>☰</MenuBtn>}
         <EmptyState>
           <GlassTitle>Priva</GlassTitle>
           <p>Güvenli sohbet için birini seç.</p>
@@ -77,23 +76,28 @@ export const Chats = ({ isOpen, selectedUser, currentUser }) => {
 
   return (
     <ChatLayout>
-      <HeaderContainer isOpen={isOpen}>
+      <HeaderContainer>
         <HeaderGlass>
-          <UserSection>
-            <HeaderAvatar
-              src={selectedUser.photoURL}
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
-              }}
-            />
-            <HeaderInfo>
-              <h4>{selectedUser.displayName}</h4>
-              <Badge>🔒 Uçtan Uca Şifreli</Badge>
-            </HeaderInfo>
-          </UserSection>
+          {!isOpen && (
+            <MenuBtnInside onClick={toggleSidebar}>
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+              </svg>
+            </MenuBtnInside>
+          )}
+
+          <HeaderAvatar
+            src={selectedUser.photoURL}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src =
+                "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png";
+            }}
+          />
+          <HeaderInfo>
+            <h4>{selectedUser.displayName}</h4>
+            <Badge>🔒 Uçtan Uca Şifreli</Badge>
+          </HeaderInfo>
         </HeaderGlass>
       </HeaderContainer>
       <MessageArea>
@@ -126,34 +130,64 @@ export const Chats = ({ isOpen, selectedUser, currentUser }) => {
           </SendBtn>
         </InputGlass>
       </InputContainer>
-
     </ChatLayout>
   );
 };
 
+
 const ChatLayout = styled.div`
   display: flex;
   flex-direction: column;
-  height: 110vh;
+  height: 100vh;
   width: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
+  position: relative;
+`;
+
+const MenuBtn = styled.button`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1.5rem;
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  display: grid;
+  place-items: center;
+`;
+
+const MenuBtnInside = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const HeaderContainer = styled.div`
-  flex: 0 0 auto;
-  width: 100%;
+ position: fixed;
+  top: 8px;
+  right: 0;
+  z-index: 100;
+  padding: 0 20px;
   box-sizing: border-box;
-  padding-top: 100px;
-  padding-bottom: 10px;
-  padding-right: 60px;
-  padding-left: ${(props) => (props.isOpen ? "55px" : "90px")};
-  transition: padding-left 0.3s ease;
-
-  z-index: 10;
+  transition: left 0.3s ease, width 0.3s ease;
+  left: ${props => props.isOpen ? '320px' : '0'};
+  width: ${props => props.isOpen ? 'calc(100% - 320px)' : '100%'};
 
   @media (max-width: 768px) {
-    display: ${(props) => (props.isOpen ? "none" : "block")};
+    left: 0 !important;
+    width: 100% !important;
+    padding: 0 10px;
   }
 `;
 
@@ -167,39 +201,93 @@ const HeaderGlass = styled.div`
   display: flex;
   align-items: center;
   padding: 0 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 `;
 
+const HeaderAvatar = styled.img`
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  margin-right: 15px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+`;
+const HeaderInfo = styled.div`
+  h4 {
+    margin: 0;
+    color: white;
+    font-weight: 600;
+  }
+`;
+const Badge = styled.span`
+  font-size: 0.7rem;
+  color: #00a884;
+  background: rgba(0, 168, 132, 0.15);
+  padding: 2px 8px;
+  border-radius: 6px;
+`;
 
 const MessageArea = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px;
+  padding: 151px 20px 100px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  scrollbar-width: none;
+
   &::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    padding-top: 155px;
   }
 `;
 
-const InputContainer = styled.div`
-  flex: 0 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  padding-top: 10px;
-  padding-bottom: 15px; 
-  padding-right: 50px;
-  padding-left: ${(props) => (props.isOpen ? "55px" : "100px")};
-  transition: padding-left 0.3s ease;
-  z-index: 10;
+const Bubble = styled.div`
+  max-width: 70%;
+  padding: 12px 18px;
+  color: white;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  align-self: ${(props) => (props.isMe ? "flex-end" : "flex-start")};
+  background: ${(props) =>
+    props.isMe
+      ? "linear-gradient(135deg, rgba(0, 168, 132, 0.9), rgba(0, 143, 111, 0.9))"
+      : "rgba(50, 50, 50, 0.85)"};
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
+  border-bottom-right-radius: ${(props) => (props.isMe ? "4px" : "20px")};
+  border-bottom-left-radius: ${(props) => (props.isMe ? "20px" : "4px")};
+  word-wrap: break-word;
+`;
+const Time = styled.span`
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.7);
+  display: block;
+  text-align: right;
+  margin-top: 4px;
+`;
 
-    @media (max-width: 768px) {
-    display: ${(props) => (props.isOpen ? "10px" : "90px")};
-    form {
-      display: ${(props) => (props.isOpen ? "none" : "90px")};
-    }
+const InputContainer = styled.div`
+  position: fixed;
+  bottom: 10px;
+  z-index: 20;
+  box-sizing: border-box;
+  padding: 0 20px;
+  left: ${(props) => (props.isOpen ? "320px" : "0")};
+  width: ${(props) => (props.isOpen ? "calc(100% - 320px)" : "100%")};
+  transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    left: 0;
+    width: 100%;
+    padding: 0 15px;
   }
 `;
 
@@ -210,75 +298,13 @@ const InputGlass = styled.div`
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 30px;
-  
   display: flex;
   align-items: center;
-  padding: 0 10px 0 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  padding: 0 10px 0 25px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 `;
 
-const UserSection = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-`;
-const HeaderAvatar = styled.img`
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  margin-right: 15px;
-  object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-`;
-const HeaderInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  h4 {
-    margin: 0;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-`;
-const Badge = styled.span`
-  font-size: 0.7rem;
-  color: #00a884;
-  font-weight: 500;
-  margin-top: 2px;
-  background: rgba(0, 168, 132, 0.1);
-  padding: 2px 8px;
-  border-radius: 6px;
-  width: fit-content;
-`;
-const Bubble = styled.div`
-  max-width: 70%;
-  padding: 12px 18px;
-  position: relative;
-  word-wrap: break-word;
-  color: white;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  align-self: ${(props) => (props.isMe ? "flex-end" : "flex-start")};
-  background: ${(props) =>
-    props.isMe
-      ? "linear-gradient(135deg, #00A884 0%, #008f6f 100%)"
-      : "rgba(50, 50, 50, 0.8)"};
-  backdrop-filter: blur(5px);
-  border: 1px solid
-    ${(props) =>
-      props.isMe ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.05)"};
-  border-radius: 20px;
-  border-bottom-right-radius: ${(props) => (props.isMe ? "4px" : "20px")};
-  border-bottom-left-radius: ${(props) => (props.isMe ? "20px" : "4px")};
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-`;
-const Time = styled.span`
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.7);
-  display: block;
-  text-align: right;
-  margin-top: 4px;
-`;
 const Input = styled.input`
   flex: 1;
   border: none;
@@ -286,9 +312,6 @@ const Input = styled.input`
   outline: none;
   font-size: 1rem;
   color: white;
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
 `;
 const SendBtn = styled.button`
   background: #00a884;
@@ -299,13 +322,8 @@ const SendBtn = styled.button`
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: 0.2s;
-  &:hover {
-    transform: scale(1.05);
-    background: #00c49a;
-  }
-  margin-left: 10px;
 `;
+
 const EmptyState = styled.div`
   height: 100%;
   display: flex;
@@ -313,20 +331,11 @@ const EmptyState = styled.div`
   align-items: center;
   justify-content: center;
   color: white;
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 10px;
-  }
-  p {
-    font-size: 1.1rem;
-    opacity: 0.7;
-  }
 `;
 const GlassTitle = styled.h1`
   font-size: 4rem;
-  font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+  background: linear-gradient(135deg, #fff, #aaa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 20px rgba(0, 168, 132, 0.3));
